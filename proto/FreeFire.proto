@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package FreeFire;
+
+message LoginReq {
+  string open_id = 1;
+  string login_token = 2;
+  uint32 orign_platform_type = 3;
+}
+
+message LoginRes {
+  uint64 account_id = 1;
+  string jwt_token = 2;
+  string server_url = 3;
+  string lock_region = 4;
+  uint32 server_type = 5;
+  uint64 expire_at = 6;
+  string nickname = 7;
+  uint32 level = 8;
+  uint32 region = 9;
+  string client_version = 10;
+}
