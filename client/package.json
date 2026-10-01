@@ -1,0 +1,9 @@
+{
+  "name": "ff-client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ffapis": "^3.0.1"
+  }
+}
