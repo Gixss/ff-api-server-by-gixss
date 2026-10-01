@@ -1,17 +1,14 @@
 // api/health.js
-import { ok, methodNotAllowed } from "../lib/response.js";
-import { getRegionList } from "../lib/regions.js";
-import { config } from "../lib/config.js";
+import { ok, methodNotAllowed } from '../lib/response.js';
+import { OB, REGIONS } from '../lib/ff.js';
 
 export default function handler(req, res) {
-  if (req.method !== "GET") return methodNotAllowed(res);
+  if (req.method !== 'GET') return methodNotAllowed(res);
   return ok(res, {
-    service: "ff-api-server",
-    game_version: config.gameVersion,
-    client_version: config.clientVersion,
-    major_login_url: config.majorLoginUrl,
-    oauth_url: config.oauthUrl,
-    regions: getRegionList(),
+    service: 'ff-api-server',
+    backend: 'ffapis',
+    ob_version: OB,
+    regions: REGIONS,
     time: new Date().toISOString()
   });
 }
