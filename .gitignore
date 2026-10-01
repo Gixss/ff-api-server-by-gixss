@@ -4,3 +4,6 @@ node_modules/
 .DS_Store
 coverage/
 dist/
+accounts.json
+like-results-*.json
+accounts-backup-*.json
