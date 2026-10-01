@@ -2,10 +2,10 @@
   "version": 2,
   "rewrites": [
     { "source": "/api/health", "destination": "/api/health" },
-    { "source": "/api/auth/guest", "destination": "/api/auth/guest" },
+    { "source": "/api/auth/register", "destination": "/api/auth/register" },
     { "source": "/api/auth/login", "destination": "/api/auth/login" },
-    { "source": "/api/auth/refresh", "destination": "/api/auth/refresh" },
-    { "source": "/api/region/list", "destination": "/api/region/list" },
-    { "source": "/api/me", "destination": "/api/me" }
+    { "source": "/api/auth/profile", "destination": "/api/auth/profile" },
+    { "source": "/api/like/send", "destination": "/api/like/send" },
+    { "source": "/api/region/list", "destination": "/api/region/list" }
   ]
 }
