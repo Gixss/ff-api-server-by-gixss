@@ -1,52 +1,41 @@
 // api/auth/login.js
-import { signSessionForAccount, signRefreshForAccount } from "../../lib/jwt.js";
-import { store } from "../../lib/store.js";
-import { rateLimit, getClientIp } from "../../lib/ratelimit.js";
-import { getRegion } from "../../lib/regions.js";
-import { ok, fail, methodNotAllowed, parseBody } from "../../lib/response.js";
-import { config } from "../../lib/config.js";
+// Login pake uid + password via ffapis.
+
+import { getFF } from '../../lib/ff.js';
+import { ok, fail, methodNotAllowed, parseBody } from '../../lib/response.js';
+import { rateLimit, getClientIp } from '../../lib/ratelimit.js';
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return methodNotAllowed(res);
+  if (req.method !== 'POST') return methodNotAllowed(res);
 
   const ip = getClientIp(req);
-  const rl = rateLimit(`login:${ip}`, config.rateLimitMax, config.rateLimitWindowMs);
+  const rl = rateLimit(`login:${ip}`, 60, 60000);
   if (!rl.ok) {
-    res.setHeader("Retry-After", Math.ceil((rl.reset - Date.now()) / 1000));
-    return fail(res, 429, "RATE_LIMITED", "Too many requests");
+    res.setHeader('Retry-After', Math.ceil((rl.reset - Date.now()) / 1000));
+    return fail(res, 429, 'RATE_LIMITED', 'Too many requests');
   }
 
   const { body, err } = parseBody(req);
-  if (err) return fail(res, 400, err, "Body bukan JSON valid");
+  if (err) return fail(res, 400, err, 'Body bukan JSON valid');
 
-  const { uid } = body;
-  if (!uid || typeof uid !== "string") {
-    return fail(res, 400, "INVALID_UID", "uid wajib string");
+  const { uid, password } = body;
+  if (!uid || typeof uid !== 'string') {
+    return fail(res, 400, 'INVALID_UID', 'uid wajib string numerik');
+  }
+  if (!password || typeof password !== 'string' || password.length < 6) {
+    return fail(res, 400, 'INVALID_PASSWORD', 'password wajib min 6 karakter');
   }
 
-  const acc = store.getByUid(uid);
-  if (!acc) return fail(res, 401, "INVALID_CREDENTIALS", "UID tidak ditemukan");
+  try {
+    const api = getFF();
+    const session = await api.login(uid, password);
 
-  const now = new Date().toISOString();
-  store.updateLastLogin(uid, now);
-
-  const session_token = signSessionForAccount(acc);
-  const refresh_token = signRefreshForAccount(acc);
-  store.saveRefresh(refresh_token, acc.uid);
-
-  const region = getRegion(acc.region);
-
-  return ok(res, {
-    uid: acc.uid,
-    profile_id: acc.profile_id,
-    display_name: acc.display_name,
-    session_token,
-    refresh_token,
-    token_type: "Bearer",
-    region: acc.region,
-    region_name: region?.name || acc.region,
-    lock_region: acc.lock_region,
-    server_url: acc.server_url,
-    last_login: now
-  });
+    return ok(res, {
+      uid,
+      session,
+      logged_at: new Date().toISOString()
+    });
+  } catch (e) {
+    return fail(res, 401, 'LOGIN_FAILED', e?.message || 'ffapis login error');
+  }
 }
